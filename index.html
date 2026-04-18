@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launchpad | Your next job. Any city. Any country.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light theme variables */
+            --bg-color: #f8fafc; /* subtle slate background */
+            --text-main: #0f172a; /* dark slate */
+            --text-muted: #64748b;
+            --accent: #2563eb; /* professional blue */
+            --accent-hover: #1d4ed8;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Hide default cursor to use custom one */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Mouse tracking background gradient - subtle spotlight for light theme */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(37, 99, 235, 0.04),
+                transparent 40%
+            );
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            transition: width 0.2s, height 0.2s;
+        }
+        .cursor-glow {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            transition: top 0.1s ease-out, left 0.1s ease-out, width 0.2s, height 0.2s;
+        }
+
+        /* Hover states for cursor */
+        body.hovering .cursor-dot {
+            width: 12px;
+            height: 12px;
+        }
+        body.hovering .cursor-glow {
+            width: 60px;
+            height: 60px;
+            border-color: rgba(37, 99, 235, 0.6);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(248, 250, 252, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .logo:hover .brand-logo {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+        .nav-links {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+                gap: 32px;
+            }
+            .nav-links a {
+                text-decoration: none;
+                color: var(--text-muted);
+                font-weight: 500;
+                font-size: 0.95rem;
+                transition: color 0.2s;
+            }
+            .nav-links a:hover {
+                color: var(--text-main);
+            }
+        }
+        .btn-small {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--accent);
+            color: #ffffff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-small:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Layout & Sections */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 160px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            position: relative;
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Unified content box */
+        .unified-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin: 120px auto;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+        .unified-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
+        }
+        .unified-box > * {
+            position: relative;
+            z-index: 1;
+        }
+        .unified-box section {
+            background: #f8fafc;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 24px;
+            padding: 80px 48px;
+            margin: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        @media (max-width: 768px) {
+            .unified-box section {
+                padding: 60px 24px;
+                margin: 20px;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            min-height: 700px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 24px 0; /* offset for navbar */
+            overflow: hidden;
+            --hero-mouse-x: 50%;
+            --hero-mouse-y: 50%;
+        }
+        .hero-photos {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            height: 100%;
+            width: 100%;
+            z-index: 0;
+        }
+        .hero-photo-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .hero-photos img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 1;
+            transition: transform 0.8s ease-out;
+        }
+        .hero:hover .hero-photos img {
+            transform: scale(1.02);
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-color);
+            opacity: 0.55; /* photos more visible globally */
+            z-index: 1;
+            /* softer cursor mask */
+            mask-image: radial-gradient(circle 600px at var(--hero-mouse-x) var(--hero-mouse-y), rgba(0,0,0,0.5) 0%, rgba(0,0,0,1) 80%);
+            -webkit-mask-image: radial-gradient(circle 600px at var(--hero-mouse-x) var(--hero-mouse-y), rgba(0,0,0,0.5) 0%, rgba(0,0,0,1) 80%);
+            pointer-events: none;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 64px 48px;
+            border-radius: 32px;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(255, 255, 255, 1);
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .hero-photos {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+            }
+            .hero-content {
+                padding: 40px 24px;
+                border-radius: 24px;
+            }
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+            cursor: none;
+            height: 38px;
+            width: 220px;
+        }
+        @keyframes flyAway {
+            0% { transform: translateY(30px) translateX(-20px) rotate(-20deg) scale(1); opacity: 0; }
+            15% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
+            45% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) translateX(120px) rotate(45deg) scale(0.5); opacity: 0; }
+        }
+        .badge-text, .badge-icon {
+            position: absolute;
+        }
+        .badge-text {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+        }
+        .badge-icon {
+            font-size: 1.25rem;
+            transform: translateY(30px) translateX(-20px) rotate(-20deg);
+            opacity: 0;
+        }
+        .hero-badge:hover .badge-text {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        .hero-badge:hover .badge-icon {
+            animation: flyAway 1.5s ease-in-out forwards;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            line-height: 1.1;
+            background: linear-gradient(to right, #000000 0%, #1e3a8a 45%, #ea580c 75%, #7c2d12 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        .hero p {
+            font-size: clamp(1.125rem, 2vw, 1.25rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 48px;
+        }
+
+        /* Button & CTA */
+        .btn {
+            display: inline-block;
+            padding: 18px 36px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: var(--accent);
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+            background-color: var(--accent-hover);
+        }
+
+        /* How it works */
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            margin-bottom: 64px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card, .unified-box, .waitlist {
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before, .unified-box::before, .waitlist::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(37, 99, 235, 0.05), transparent 40%);
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .card:hover::before, .unified-box:hover::before, .waitlist:hover::before {
+            opacity: 1;
+        }
+        .card > *, .unified-box > *, .waitlist > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Cards / Who it's for */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px 32px;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
+        }
+        .card > * {
+            position: relative;
+            z-index: 1;
+        }
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        .card p {
+            color: var(--text-muted);
+        }
+
+        /* Destinations */
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+        .destination-card {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3;
+            display: block;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transform: translateZ(0);
+        }
+        .destination-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .destination-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.4s ease;
+        }
+        .destination-title {
+            color: #ffffff;
+            font-size: 2.25rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .destination-card:hover .destination-img {
+            transform: scale(1.08);
+        }
+        .destination-card:hover .destination-overlay {
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.8));
+        }
+        .destination-card:hover .destination-title {
+            transform: scale(1.05);
+        }
+
+        /* About Us Section */
+        #about-us {
+            text-align: center;
+        }
+        #about-us p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* Waitlist */
+        .waitlist {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 60px 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+            border: 1px solid var(--card-border);
+        }
+        .waitlist-form {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-direction: column;
+            align-items: center;
+        }
+        @media (min-width: 600px) {
+            .waitlist-form {
+                flex-direction: row;
+            }
+        }
+        .waitlist-input {
+            flex: 1;
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #f8fafc;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .waitlist-input:focus {
+            background: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .waitlist-form .btn {
+            width: 100%;
+            padding: 16px 32px;
+            box-shadow: none;
+        }
+        @media (min-width: 600px) {
+            .waitlist-form .btn {
+                width: auto;
+                white-space: nowrap;
+            }
+        }
+        .counter {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .counter-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+        }
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.125rem;
+        }
+        .built-with {
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        /* Make links, inputs and buttons change cursor */
+        a, button, input {
+            cursor: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="cursor-glow"></div>
+    <div class="cursor-dot"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo interactive">
+                <svg width="40" height="40" viewBox="0 0 100 100" class="interactive-logo" xmlns="http://www.w3.org/2000/svg">
+                    <style>
+                        .interactive-logo { overflow: visible; }
+                        .interactive-logo:hover .globe-group {
+                            animation: spinGlobe 8s linear infinite;
+                        }
+                        .interactive-logo:hover .hand-group {
+                            animation: hoverHand 2s ease-in-out infinite alternate;
+                        }
+                        @keyframes spinGlobe {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        @keyframes hoverHand {
+                            0% { transform: translateY(0) rotate(0deg); }
+                            100% { transform: translateY(-3px) rotate(2deg); }
+                        }
+                        .globe-group {
+                            transform-origin: 50px 45px;
+                        }
+                    </style>
+                    <!-- Globe -->
+                    <g class="globe-group">
+                        <circle cx="50" cy="45" r="38" fill="#f8fafc" stroke="#0f172a" stroke-width="4"/>
+                        <ellipse cx="50" cy="45" rx="15" ry="38" fill="none" stroke="#0f172a" stroke-width="2" opacity="0.4"/>
+                        <line x1="12" y1="45" x2="88" y2="45" stroke="#0f172a" stroke-width="2" opacity="0.4"/>
+                        <path d="M 25 25 Q 40 15 50 30 Q 35 45 25 25 Z" fill="#0f172a" opacity="0.9"/>
+                        <path d="M 65 30 Q 85 45 70 65 Q 55 50 65 30 Z" fill="#0f172a" opacity="0.9"/>
+                    </g>
+                    <!-- Flight trail -->
+                    <path d="M 5 60 C -10 30, 20 -10, 70 5" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round"/>
+                    <!-- Hand and Airplane Group -->
+                    <g class="hand-group">
+                        <!-- Hand -->
+                        <path d="M 35 100 C 40 80, 48 70, 52 70 C 58 70, 60 75, 55 85 C 50 95, 45 100, 45 100 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round"/>
+                        <path d="M 45 100 C 50 90, 65 80, 72 80 C 78 80, 78 85, 70 92 C 60 100, 55 105, 55 105 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round"/>
+                        <!-- Paper plane -->
+                        <path d="M 32 60 L 95 25 L 65 72 L 52 62 L 72 40 L 32 60 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round"/>
+                        <!-- Details inside the plane -->
+                        <rect x="48" y="48" width="8" height="8" rx="2" fill="#2563eb" transform="rotate(-30 48 48)"/>
+                        <line x1="58" y1="45" x2="70" y2="38" stroke="#2563eb" stroke-width="2"/>
+                        <line x1="60" y1="49" x2="68" y2="44" stroke="#2563eb" stroke-width="2"/>
+                    </g>
+                </svg>
+                <span class="logo-text">Launchpad</span>
+            </a>
+            <div class="nav-links">
+                <a href="#how-it-works" class="interactive">How it Works</a>
+                <a href="#who-its-for" class="interactive">Who We Serve</a>
+                <a href="#destinations" class="interactive">Destinations</a>
+                <a href="#about-us" class="interactive">About Us</a>
+            </div>
+            <a href="#waitlist" class="btn-small interactive">Join Waitlist</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero visible" id="hero">
+            <div class="hero-photos">
+                <div class="hero-photo-wrapper"><img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=800" alt="Amsterdam"></div>
+                <div class="hero-photo-wrapper"><img src="images/dublin.png" alt="Dublin"></div>
+                <div class="hero-photo-wrapper"><img src="https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=800" alt="Barcelona"></div>
+                <div class="hero-photo-wrapper"><img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?q=80&w=800" alt="Sydney"></div>
+                <div class="hero-photo-wrapper"><img src="images/hongkong.png" alt="Hong Kong"></div>
+                <div class="hero-photo-wrapper"><img src="https://images.unsplash.com/photo-1480796927426-f609979314bd?q=80&w=800" alt="Stockholm"></div>
+            </div>
+            <div class="hero-overlay"></div>
+            
+            <div class="container hero-content">
+                <div class="hero-badge interactive">
+                    <span class="badge-text">🚀 Launching Soon globally</span>
+                    <span class="badge-icon">✈️</span>
+                </div>
+                <h1>Your next job.<br>Any city. Any country.</h1>
+                <p>AI finds the roles. AI writes the CV. You just apply. We're removing borders from your career path.</p>
+                <a href="#waitlist" class="btn interactive">Join the waitlist</a>
+            </div>
+        </section>
+
+        <div class="container unified-box">
+            <section id="how-it-works">
+            <h2 class="section-title">How it works</h2>
+            <p class="section-subtitle">Three simple steps to your international career. We handle the heavy lifting so you can focus on interviewing.</p>
+            <div class="cards">
+                <div class="card interactive-card">
+                    <h3>🎯 1. Set your target</h3>
+                    <p>Tell us your preferred cities, roles, and visa requirements.</p>
+                </div>
+                <div class="card interactive-card">
+                    <h3>🤖 2. AI scouting</h3>
+                    <p>Our agent scans 100+ global companies daily for perfect matches.</p>
+                </div>
+                <div class="card interactive-card">
+                    <h3>📄 3. Receive applications</h3>
+                    <p>Get perfectly tailored CVs and cover letters, ready to send.</p>
+                </div>
+            </div>
+        </section>
+
+            <section id="who-its-for">
+            <h2 class="section-title">Who we serve</h2>
+            <p class="section-subtitle">Designed specifically for ambitious professionals ready to cross borders.</p>
+            <div class="cards">
+                <div class="card interactive-card">
+                    <h3>🎓 Recent graduates</h3>
+                    <p>Start your career with global opportunities tailored to your degree and skills. Skip the local entry-level queue.</p>
+                </div>
+                <div class="card interactive-card">
+                    <h3>🔬 Master's students</h3>
+                    <p>Find specialized roles that match your advanced education in any major tech hub around the world.</p>
+                </div>
+                <div class="card interactive-card">
+                    <h3>✈️ Relocating internationally</h3>
+                    <p>Looking to move abroad? We specifically find companies with a history of sponsoring visas in your target cities.</p>
+                </div>
+            </div>
+        </section>
+
+            <section id="destinations">
+            <h2 class="section-title">Popular Destinations</h2>
+            <p class="section-subtitle">Discover where our candidates are successfully relocating. Every city offers unique opportunities and quality of life.</p>
+            
+            <div class="destinations-grid">
+                <a href="#waitlist" class="destination-card interactive">
+                    <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=800" alt="Amsterdam" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Amsterdam</h3>
+                    </div>
+                </a>
+                <a href="dublin.html" class="destination-card interactive">
+                    <img src="images/dublin.png" alt="Dublin" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Dublin</h3>
+                    </div>
+                </a>
+                <a href="#waitlist" class="destination-card interactive">
+                    <img src="https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=800" alt="Barcelona" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Barcelona</h3>
+                    </div>
+                </a>
+                <a href="#waitlist" class="destination-card interactive">
+                    <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?q=80&w=800" alt="Sydney" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Sydney</h3>
+                    </div>
+                </a>
+                <a href="#waitlist" class="destination-card interactive">
+                    <img src="images/hongkong.png" alt="Hong Kong" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Hong Kong</h3>
+                    </div>
+                </a>
+                <a href="#waitlist" class="destination-card interactive">
+                    <img src="https://images.unsplash.com/photo-1480796927426-f609979314bd?q=80&w=800" alt="Stockholm" class="destination-img">
+                    <div class="destination-overlay">
+                        <h3 class="destination-title">Stockholm</h3>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+            <section id="about-us">
+            <h2 class="section-title">About Us</h2>
+            <p>
+                Launchpad was born from a simple realization: talent is equally distributed globally, but opportunity is not. 
+                Navigating international job markets, understanding visa sponsorships, and tailoring applications to different cultural standards is exhausting. 
+                We built an AI agent to level the playing field. Whether you're in São Paulo dreaming of Stockholm, or in London looking at Sydney, we believe borders shouldn't dictate your career trajectory.
+            </p>
+            </section>
+        </div>
+
+        <section class="container" id="waitlist">
+            <div class="waitlist">
+                <h2 class="section-title" style="margin-bottom: 16px;">Secure your early access</h2>
+                <p style="color: var(--text-muted); margin-bottom: 32px;">Join the waitlist to be notified when we launch in your region.</p>
+                <form class="waitlist-form" onsubmit="event.preventDefault();">
+                    <input type="email" placeholder="Enter your email address" class="waitlist-input interactive" required>
+                    <button type="submit" class="btn interactive">Join waitlist</button>
+                </form>
+                <div class="counter">
+                    <span class="counter-dot"></span>
+                    237 people already waiting
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="container">
+        <footer>
+            <a href="#" class="logo interactive">
+                <img src="images/logo.png" alt="Launchpad Logo" class="brand-logo">
+                <span class="logo-text">Launchpad</span>
+            </a>
+            <div class="built-with">Built with AI</div>
+        </footer>
+    </div>
+
+    <script>
+        // Custom Cursor Logic
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorGlow = document.querySelector('.cursor-glow');
+        const interactives = document.querySelectorAll('.interactive, .interactive-card, a, button, input');
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let glowX = window.innerWidth / 2;
+        let glowY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Update dot instantly
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+
+            // Update background gradient variables
+            document.documentElement.style.setProperty('--mouse-x', `${mouseX}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${mouseY}px`);
+
+            // Check if card hovered to update specific card gradient
+            const interactiveElements = document.querySelectorAll('.unified-box, .card, .waitlist');
+            interactiveElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                el.style.setProperty('--mouse-x', `${x}px`);
+                el.style.setProperty('--mouse-y', `${y}px`);
+            });
+
+            // Update hero background spotlight
+            const hero = document.getElementById('hero');
+            if (hero) {
+                const rect = hero.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                hero.style.setProperty('--hero-mouse-x', `${x}px`);
+                hero.style.setProperty('--hero-mouse-y', `${y}px`);
+            }
+        });
+
+        // Smooth follow for the glow
+        function animateGlow() {
+            glowX += (mouseX - glowX) * 0.15;
+            glowY += (mouseY - glowY) * 0.15;
+            
+            cursorGlow.style.left = `${glowX}px`;
+            cursorGlow.style.top = `${glowY}px`;
+            
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // Hover effect for interactive elements
+        interactives.forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // Hide cursor when leaving window
+        document.addEventListener('mouseout', () => {
+            cursorDot.style.opacity = 0;
+            cursorGlow.style.opacity = 0;
+        });
+        document.addEventListener('mouseover', () => {
+            cursorDot.style.opacity = 1;
+            cursorGlow.style.opacity = 1;
+        });
+
+        // Navbar blur on scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.05)';
+            } else {
+                navbar.style.boxShadow = 'none';
+            }
+        });
+
+        // Scroll Animations (Intersection Observer)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            if (!section.classList.contains('hero')) {
+                observer.observe(section);
+            }
+        });
+    </script>
+</body>
+</html>
