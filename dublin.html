@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launchpad | Relocate to Dublin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="images/logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Launchpad">
+    <style>
+        /* Base styles loaded from index.html (I will include the necessary subset to save space and keep it fast) */
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; }
+        .cursor-dot, .cursor-glow { position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
+        .cursor-dot { width: 8px; height: 8px; background-color: var(--accent); transition: width 0.2s, height 0.2s; }
+        .cursor-glow { width: 40px; height: 40px; border: 1px solid rgba(37, 99, 235, 0.3); transition: top 0.1s ease-out, left 0.1s ease-out; }
+        body.hovering .cursor-dot { width: 12px; height: 12px; }
+        body.hovering .cursor-glow { width: 60px; height: 60px; border-color: rgba(37, 99, 235, 0.6); background-color: rgba(37, 99, 235, 0.05); }
+
+        .navbar { position: fixed; top: 0; width: 100%; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 1000; border-bottom: 1px solid rgba(226, 232, 240, 0.6); }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-main); }
+        .brand-logo { width: 44px; height: 44px; object-fit: contain; mix-blend-mode: multiply; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .logo:hover .brand-logo { transform: scale(1.1) rotate(5deg); }
+        .logo-text { font-weight: 800; font-size: 1.25rem; }
+        .nav-links { display: none; }
+        @media (min-width: 768px) { .nav-links { display: flex; gap: 32px; } .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; } .nav-links a:hover { color: var(--text-main); } }
+        .btn-small { display: inline-block; padding: 10px 20px; background-color: var(--accent); color: #ffffff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .btn-small:hover { background-color: var(--accent-hover); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 48px; font-weight: 700; letter-spacing: -0.02em; }
+        
+        .page-hero { position: relative; height: 60vh; min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; background-size: cover; background-position: center; margin-bottom: 80px; }
+        .page-hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; margin-bottom: 16px; }
+        .page-hero h1 span { color: #93c5fd; }
+        .page-hero p { font-size: 1.25rem; max-width: 600px; opacity: 0.9; }
+
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 80px; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 40px 32px; transition: transform 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-5px); border-color: rgba(37,99,235,0.3); }
+        .card h3 { font-size: 1.5rem; margin-bottom: 12px; font-weight: 700; }
+        .card p { color: var(--text-muted); }
+
+        .benefits { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-bottom: 120px; }
+        .benefit-item { display: flex; gap: 24px; align-items: flex-start; }
+        .benefit-icon { width: 48px; height: 48px; font-size: 24px; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; }
+        .benefit-content h3 { font-size: 1.25rem; margin-bottom: 8px; font-weight: 600; }
+        .benefit-content p { color: var(--text-muted); font-size: 0.95rem; }
+
+        footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--card-border); color: var(--text-muted); margin-top: 60px; }
+    </style>
+</head>
+<body>
+    <div class="cursor-glow"></div>
+    <div class="cursor-dot"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo interactive">
+                <img src="images/logo.png" alt="Launchpad Logo" class="brand-logo">
+                <span class="logo-text">Launchpad</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="interactive">Back to Home</a>
+            </div>
+            <a href="index.html#waitlist" class="btn-small interactive">Join Waitlist</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-hero" style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1549918864-48ac978761a4?q=80&w=1200');">
+            <div class="container">
+                <h1>Destination: <span>Dublin</span></h1>
+                <p>The tech capital of Europe. Fast-track your career with top-tier visa sponsorships.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <h2 class="section-title">Top Companies Sponsoring Visas</h2>
+            <div class="cards">
+                <div class="card interactive">
+                    <h3>Meta</h3>
+                    <p>European HQ located in Grand Canal Dock. Regularly sponsors critical tech talent globally.</p>
+                </div>
+                <div class="card interactive">
+                    <h3>Google</h3>
+                    <p>Massive presence in the Silicon Docks. Comprehensive relocation packages provided.</p>
+                </div>
+                <div class="card interactive">
+                    <h3>Stripe</h3>
+                    <p>Dual-HQ with strong engineering hubs. Highly supportive of international hires.</p>
+                </div>
+                <div class="card interactive">
+                    <h3>HubSpot</h3>
+                    <p>Known for amazing company culture and willingness to sponsor senior roles.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <h2 class="section-title">Benefits of Living in Dublin</h2>
+            <div class="benefits">
+                <div class="benefit-item interactive">
+                    <div class="benefit-icon">🌍</div>
+                    <div class="benefit-content">
+                        <h3>English-Speaking Tech Hub</h3>
+                        <p>Seamless integration into the local tech community and culture without language barriers.</p>
+                    </div>
+                </div>
+                <div class="benefit-item interactive">
+                    <div class="benefit-icon">💶</div>
+                    <div class="benefit-content">
+                        <h3>High Earning Potential</h3>
+                        <p>Some of the highest tech salaries in Europe with excellent benefits and stock options.</p>
+                    </div>
+                </div>
+                <div class="benefit-item interactive">
+                    <div class="benefit-icon">✈️</div>
+                    <div class="benefit-content">
+                        <h3>Gateway to Europe</h3>
+                        <p>Incredible flight connectivity to the rest of Europe for weekend getaways.</p>
+                    </div>
+                </div>
+                <div class="benefit-item interactive">
+                    <div class="benefit-icon">🍻</div>
+                    <div class="benefit-content">
+                        <h3>Vibrant Culture</h3>
+                        <p>World-famous pubs, friendly locals, and a rich history right at your doorstep.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Launchpad. Removing borders from your career path.</p>
+        </div>
+    </footer>
+
+    <script>
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorGlow = document.querySelector('.cursor-glow');
+
+        // Mouse tracking
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // Move the elements
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+            cursorGlow.style.left = `${mouseX}px`;
+            cursorGlow.style.top = `${mouseY}px`;
+        });
+
+        // Hover effect for interactive elements
+        const interactives = document.querySelectorAll('.interactive');
+        interactives.forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('ServiceWorker registration successful'))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</body>
+</html>
